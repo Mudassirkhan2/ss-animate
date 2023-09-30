@@ -2,14 +2,51 @@
 
 import { useEffect, useRef, useState } from 'react';
 import styles from './page.module.scss';
+import Image from 'next/image';
 
 export default function Product() {
-	const [size, setSize] = useState(0);
+	const [size, setSize] = useState(400);
+	const [sizeImage, setSizesizeImage] = useState(200);
+
 	// const canvasRef = useRef(null);
 	// const downloadButtonRef = useRef(null);
 	// const mediaRecorderRef = useRef(null);
 	// const chunksRef = useRef([]);
+	// useEffect(() => {
+	// 	if (fileinput) {
+	// 		setImgUrl(fileinput);
+	// 	}
+	// }, [fileinput]);
+	const [dataURL, setDataURL] = useState(null);
 
+	const handleFileChange = async (e) => {
+		const file = e.target.files[0];
+		if (file) {
+			try {
+				const dataURL = await readFileAsDataURL(file);
+				console.log(dataURL)
+				setDataURL(dataURL);
+			} catch (error) {
+				console.error("An error occurred:", error);
+			}
+		}
+	};
+
+	const readFileAsDataURL = (file) => {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+
+			reader.onload = (event) => {
+				resolve(event.target.result);
+			};
+
+			reader.onerror = (event) => {
+				reject(event.target.error);
+			};
+
+			reader.readAsDataURL(file);
+		});
+	};
 	// useEffect(() => {
 	// 	const canvas = canvasRef.current;
 	// 	const ctx = canvas.getContext('2d');
@@ -81,21 +118,47 @@ export default function Product() {
         <canvas ref={canvasRef} id='canvas'></canvas>
         <button ref={downloadButtonRef}>Download</button>
       </div> */}
-			<div className={styles.wrapper}>
-				<div className={styles.background}></div>
-				<div className={styles.overlay}></div>
-			</div>
-
 			<div>
-				<input
-					type='range'
-					min='1'
-					max='100'
-					value={size}
-					className='slider'
-					id='myRange'
-					onChange={(e) => setSize(e.target.value)}
-				/>
+				<input type="file"
+					accept="image/*"
+					onChange={handleFileChange} />
+			</div>
+			{
+				dataURL &&
+				<div className={styles.wrapper} style={{ width: size + 'px', height: size + 'px' }}>
+					<div className={styles.background} ></div>
+					<div className={styles.overlay} style={{ width: sizeImage + 'px', height: sizeImage + 'px' }}>
+						<Image className={styles.overlay} src={dataURL} alt="Picture of the author" width={sizeImage} height={sizeImage} />
+					</div>
+
+				</div>
+			}
+
+			<div className={styles.sliderContainer}>
+				<div className={styles.sliderContainerInside}>
+					<label for='myRange'>Size</label>
+					<input
+						type='range'
+						min='400'
+						max='800'
+						value={size}
+						className='slider'
+						id='myRange'
+						onChange={(e) => setSize(e.target.value)}
+					/>
+				</div>
+				<div className={styles.sliderContainerInside}>
+					<label for='myRangeImg'>Image Size</label>
+					<input
+						type='range'
+						min='200'
+						max='400'
+						value={sizeImage}
+						className='slider'
+						id='myRangeImg'
+						onChange={(e) => setSizesizeImage(e.target.value)}
+					/>
+				</div>
 			</div>
 		</main>
 	);
